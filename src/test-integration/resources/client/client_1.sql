@@ -1,0 +1,2 @@
+INSERT INTO TEST.CLIENTS (ID, NAME)
+VALUES (1, 'Test Client');

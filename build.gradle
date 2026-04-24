@@ -1,0 +1,84 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.6'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'dev.jgregorio'
+version = '0.1.0-SNAPSHOT'
+description = 'Demo Data'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+sourceSets {
+    integrationTest {
+        java.srcDir 'src/test-integration/java'
+        resources.srcDir 'src/test-integration/resources'
+        compileClasspath += sourceSets.main.output + sourceSets.test.output
+        runtimeClasspath += sourceSets.main.output + sourceSets.test.output
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+    integrationTestCompileOnly.extendsFrom compileOnly
+    integrationTestAnnotationProcessor.extendsFrom annotationProcessor
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    mapstructVersion = '1.5.5.Final'
+    openapiVersion = '2.8.13'
+    commonsLang3Version = '3.18.0'
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${openapiVersion}") {
+        exclude group: "org.apache.commons", module: "commons-lang3"
+    }
+    // Enforce a specific version of commons-lang3 to address transitive vulnerability warnings
+    implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.hibernate.orm:hibernate-jpamodelgen'
+    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    runtimeOnly 'com.h2database:h2'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.register('integrationTest', Test) {
+    description = 'Runs integration tests.'
+    group = 'verification'
+    
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    shouldRunAfter test
+    
+    useJUnitPlatform()
+}
+
+check {
+    dependsOn integrationTest
+}

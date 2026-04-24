@@ -1,0 +1,36 @@
+# ===============================
+# DEFAULT PROFILE
+# ===============================
+# APPLICATION
+server:
+  port: 8080
+# SPRING
+spring:
+  application:
+    name: demo-data
+    description: demo data project
+    version: 0.0.1-SNAPSHOT
+  # H2 DATABASE
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema-h2.sql
+  # H2 CONSOLE
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+# LOGGING
+logging.level.dev.jgregorio.demo.back: DEBUG
+logging.level.org.hibernate.orm.jdbc.bind: TRACE

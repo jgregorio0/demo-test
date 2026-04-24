@@ -1,0 +1,6 @@
+package dev.jgregorio.demo.data.application.in.common.usecase;
+
+public interface CreateUseCase<D, C> {
+
+    D create(C toCreate);
+}
