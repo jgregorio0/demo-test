@@ -1,11 +1,13 @@
 package dev.jgregorio.demo.data.infrastructure.persistence.center;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.ArgumentMatchers.*;
-
-import dev.jgregorio.demo.data.domain.center.CenterSearch;
-import jakarta.persistence.criteria.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -26,6 +28,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.data.jpa.domain.Specification;
+
+import dev.jgregorio.demo.data.domain.center.CenterSearch;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -58,8 +67,8 @@ class CenterSpecificationTest {
                 IllegalStateException.class,
                 () -> {
                     try {
-                        Constructor<CenterSpecification> constructor =
-                                CenterSpecification.class.getDeclaredConstructor();
+                        Constructor<CenterSpecification> constructor = CenterSpecification.class
+                                .getDeclaredConstructor();
                         constructor.setAccessible(true);
                         constructor.newInstance();
                     } catch (InvocationTargetException e) {
@@ -80,20 +89,21 @@ class CenterSpecificationTest {
         JpaFunction<String> collatedPath = mock(JpaFunction.class);
         JpaPredicate likePredicate = mock(JpaPredicate.class);
         JpaPredicate finalPredicate = mock(JpaPredicate.class);
-        when(root.get(CenterEntity_.name)).thenReturn(namePath);
-        when(cb.lower(namePath)).thenReturn(lowerNamePath);
-        when(hcb.collate(lowerNamePath, "BINARY_AI")).thenReturn(collatedPath);
-        when(cb.like(collatedPath, "%some center%")).thenReturn(likePredicate);
-        when(cb.and(likePredicate)).thenReturn(finalPredicate);
+        given(root.get(CenterEntity_.name)).willReturn(namePath);
+        given(cb.lower(namePath)).willReturn(lowerNamePath);
+        given(hcb.collate(lowerNamePath, "BINARY_AI")).willReturn(collatedPath);
+        given(cb.like(collatedPath, "%some center%")).willReturn(likePredicate);
+        given(cb.and(likePredicate)).willReturn(finalPredicate);
         // When
         Predicate result = spec.toPredicate(root, query, cb);
         // Then
         assertThat(result).isNotNull();
         assertThat(result).isEqualTo(finalPredicate);
-        then(cb).lower(namePath);
-        verify(hcb).should().collate(lowerNamePath, "BINARY_AI");
+        then(root).should().get(CenterEntity_.name);
+        then(cb).should().lower(namePath);
+        then(hcb).should().collate(lowerNamePath, "BINARY_AI");
         then(cb).should().like(collatedPath, "%some center%");
-        then(cb).and(likePredicate);
+        then(cb).should().and(likePredicate);
     }
 
     @ParameterizedTest
@@ -104,7 +114,7 @@ class CenterSpecificationTest {
         CenterSearch criteria = CenterSearch.builder().name(blankName).build();
         Specification<CenterEntity> spec = CenterSpecification.search(criteria);
         Predicate finalPredicate = mock(JpaPredicate.class);
-        when(cb.and()).should().thenReturn(finalPredicate);
+        given(cb.and()).willReturn(finalPredicate);
         // When
         Predicate result = spec.toPredicate(root, query, cb);
         // Then
@@ -114,7 +124,7 @@ class CenterSpecificationTest {
         then(cb).should(never()).lower(any());
         then(hcb).should(never()).collate(any(), any());
         then(cb).should(never()).like(any(), anyString());
-        then(cb).and();
+        then(cb).should().and();
     }
 
     @Test
@@ -130,11 +140,11 @@ class CenterSpecificationTest {
         JpaPredicate likePredicate = mock(JpaPredicate.class);
         JpaPredicate finalPredicate = mock(JpaPredicate.class);
 
-        when(root.get(CenterEntity_.address)).thenReturn(addressPath);
-        when(cb.lower(addressPath)).should().thenReturn(lowerAddressPath);
-        when(hcb.collate(lowerAddressPath, "BINARY_AI")).thenReturn(collatedPath);
-        when(cb.like(collatedPath, "%some address%")).thenReturn(likePredicate);
-        when(cb.and(likePredicate)).thenReturn(finalPredicate);
+        given(root.get(CenterEntity_.address)).willReturn(addressPath);
+        given(cb.lower(addressPath)).willReturn(lowerAddressPath);
+        given(hcb.collate(lowerAddressPath, "BINARY_AI")).willReturn(collatedPath);
+        given(cb.like(collatedPath, "%some address%")).willReturn(likePredicate);
+        given(cb.and(likePredicate)).willReturn(finalPredicate);
 
         // When
         Predicate result = spec.toPredicate(root, query, cb);
@@ -142,10 +152,10 @@ class CenterSpecificationTest {
         // Then
         assertThat(result).isNotNull();
         assertThat(result).isEqualTo(finalPredicate);
-        then(cb).lower(addressPath);
-        verify(hcb).should().collate(lowerAddressPath, "BINARY_AI");
+        then(cb).should().lower(addressPath);
+        then(hcb).should().collate(lowerAddressPath, "BINARY_AI");
         then(cb).should().like(collatedPath, "%some address%");
-        then(cb).and(likePredicate);
+        then(cb).should().and(likePredicate);
     }
 
     @Test
@@ -161,18 +171,18 @@ class CenterSpecificationTest {
         JpaPredicate likePredicate = mock(JpaPredicate.class);
         JpaPredicate finalPredicate = mock(JpaPredicate.class);
 
-        when(root.get(CenterEntity_.postalCode)).thenReturn(postalCodePath);
-        when(cb.lower(postalCodePath)).should().thenReturn(lowerPostalCodePath);
-        when(hcb.collate(lowerPostalCodePath, "BINARY_AI")).thenReturn(collatedPath);
-        when(cb.like(collatedPath, "%12345%")).thenReturn(likePredicate);
-        when(cb.and(likePredicate)).thenReturn(finalPredicate);
+        given(root.get(CenterEntity_.postalCode)).willReturn(postalCodePath);
+        given(cb.lower(postalCodePath)).willReturn(lowerPostalCodePath);
+        given(hcb.collate(lowerPostalCodePath, "BINARY_AI")).willReturn(collatedPath);
+        given(cb.like(collatedPath, "%12345%")).willReturn(likePredicate);
+        given(cb.and(likePredicate)).willReturn(finalPredicate);
 
         // When
         spec.toPredicate(root, query, cb);
 
         // Then
-        then(cb).lower(postalCodePath);
-        verify(hcb).should().collate(lowerPostalCodePath, "BINARY_AI");
+        then(cb).should().lower(postalCodePath);
+        then(hcb).should().collate(lowerPostalCodePath, "BINARY_AI");
         then(cb).should().like(collatedPath, "%12345%");
         then(cb).should().and(likePredicate);
     }

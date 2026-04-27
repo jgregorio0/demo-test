@@ -1,6 +1,14 @@
 package dev.jgregorio.demo.data.domain.center;
 
-import dev.jgregorio.demo.data.application.out.center.CenterPersistencePort;
+import static dev.jgregorio.demo.data.domain.center.CenterServiceTestDataFactory.createCenter;
+import static dev.jgregorio.demo.data.domain.center.CenterServiceTestDataFactory.createCenterSearch;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,14 +21,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-
-import static dev.jgregorio.demo.data.domain.center.CenterServiceTestDataFactory.createCenter;
-import static dev.jgregorio.demo.data.domain.center.CenterServiceTestDataFactory.createCenterSearch;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import dev.jgregorio.demo.data.application.out.center.CenterPersistencePort;
 
 @ExtendWith(MockitoExtension.class)
 class SearchCenterServiceTest {

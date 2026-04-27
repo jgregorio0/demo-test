@@ -1,9 +1,18 @@
 package dev.jgregorio.demo.data.infrastructure.persistence.center;
 
-import dev.jgregorio.demo.data.domain.center.Center;
-import dev.jgregorio.demo.data.domain.center.CenterSearch;
-import dev.jgregorio.demo.data.domain.exception.ResourceNotFoundException;
-import dev.jgregorio.demo.data.domain.location.Location;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,12 +26,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.ArgumentMatchers.*;
+import dev.jgregorio.demo.data.domain.center.Center;
+import dev.jgregorio.demo.data.domain.center.CenterSearch;
+import dev.jgregorio.demo.data.domain.exception.ResourceNotFoundException;
+import dev.jgregorio.demo.data.domain.location.Location;
 
 @ExtendWith(MockitoExtension.class)
 class CenterJpaPersistenceAdapterTest {
@@ -46,15 +53,14 @@ class CenterJpaPersistenceAdapterTest {
 
     @BeforeEach
     void setUp() {
-        center =
-                Center.builder()
-                        .id(CENTER_ID)
-                        .clientId(CLIENT_ID)
-                        .name(CENTER_NAME)
-                        .address(CENTER_ADDRESS)
-                        .postalCode(CENTER_POSTAL_CODE)
-                        .location(Location.from(LOCATION_ID))
-                        .build();
+        center = Center.builder()
+                .id(CENTER_ID)
+                .clientId(CLIENT_ID)
+                .name(CENTER_NAME)
+                .address(CENTER_ADDRESS)
+                .postalCode(CENTER_POSTAL_CODE)
+                .location(Location.from(LOCATION_ID))
+                .build();
 
         CenterEntityId id = CenterEntityId.from(CENTER_ID, CLIENT_ID);
         centerEntity = new CenterEntity();
@@ -68,17 +74,17 @@ class CenterJpaPersistenceAdapterTest {
     @DisplayName("create should create new entity, save it, and return domain")
     void create_shouldCreateEntitySaveAndReturnDomain() {
         // Given
-        when(repository.save(any(CenterEntity.class))).thenReturn(centerEntity);
-        when(mapper.toDomain(centerEntity)).thenReturn(center);
+        given(repository.save(any(CenterEntity.class))).willReturn(centerEntity);
+        given(mapper.toDomain(centerEntity)).willReturn(center);
 
         // When
         Center result = adapter.create(center);
 
         // Then
         then(mapper).should().update(any(CenterEntity.class), eq(center));
-        then(repository).save(any(CenterEntity.class));
-        verify(mapper).toDomain(centerEntity);
-        assertThat(result).should().isNotNull();
+        then(repository).should().save(any(CenterEntity.class));
+        then(mapper).should().toDomain(centerEntity);
+        assertThat(result).isNotNull();
     }
 
     @Test
@@ -86,16 +92,16 @@ class CenterJpaPersistenceAdapterTest {
     void read_shouldFindByIdAndMapToDomain() {
         // Given
         CenterEntityId id = CenterEntityId.from(CENTER_ID, CLIENT_ID);
-        when(repository.findById(id)).thenReturn(Optional.of(centerEntity));
-        when(mapper.toDomain(centerEntity)).thenReturn(center);
+        given(repository.findById(id)).willReturn(Optional.of(centerEntity));
+        given(mapper.toDomain(centerEntity)).willReturn(center);
 
         // When
         Optional<Center> result = adapter.read(id);
 
         // Then
-        then(repository).findById(id);
-        verify(mapper).should().toDomain(centerEntity);
-        assertTrue(result.isPresent());
+        then(repository).should().findById(id);
+        then(mapper).should().toDomain(centerEntity);
+        assertThat(result.isPresent());
     }
 
     @Test
@@ -103,7 +109,7 @@ class CenterJpaPersistenceAdapterTest {
     void read_shouldReturnEmpty_whenEntityNotFound() {
         // Given
         CenterEntityId id = CenterEntityId.from(CENTER_ID, CLIENT_ID);
-        when(repository.findById(id)).thenReturn(Optional.empty());
+        given(repository.findById(id)).willReturn(Optional.empty());
 
         // When
         Optional<Center> result = adapter.read(id);
@@ -111,7 +117,7 @@ class CenterJpaPersistenceAdapterTest {
         // Then
         then(repository).should().findById(id);
         then(mapper).should(never()).toDomain(any(CenterEntity.class));
-        assertTrue(result.isEmpty());
+        assertThat(result.isEmpty());
     }
 
     @Test
@@ -119,16 +125,16 @@ class CenterJpaPersistenceAdapterTest {
     void read_shouldFindByIdAndClientIdUsingSpecification() {
         // Given
         CenterEntityId id = CenterEntityId.from(CENTER_ID, CLIENT_ID);
-        when(repository.findById(id)).thenReturn(Optional.of(centerEntity));
-        when(mapper.toDomain(centerEntity)).thenReturn(center);
+        given(repository.findById(id)).willReturn(Optional.of(centerEntity));
+        given(mapper.toDomain(centerEntity)).willReturn(center);
 
         // When
         Optional<Center> result = adapter.read(CENTER_ID, CLIENT_ID);
 
         // Then
-        then(repository).findById(id);
-        verify(mapper).should().toDomain(centerEntity);
-        assertTrue(result.isPresent());
+        then(repository).should().findById(id);
+        then(mapper).should().toDomain(centerEntity);
+        assertThat(result.isPresent());
     }
 
     @Test
@@ -136,7 +142,7 @@ class CenterJpaPersistenceAdapterTest {
     void read_shouldReturnEmpty_whenNotFoundByIdAndClientId() {
         // Given
         CenterEntityId id = CenterEntityId.from(CENTER_ID, CLIENT_ID);
-        when(repository.findById(id)).thenReturn(Optional.empty());
+        given(repository.findById(id)).willReturn(Optional.empty());
 
         // When
         Optional<Center> result = adapter.read(CENTER_ID, CLIENT_ID);
@@ -144,7 +150,7 @@ class CenterJpaPersistenceAdapterTest {
         // Then
         then(repository).should().findById(id);
         then(mapper).should(never()).toDomain(any(CenterEntity.class));
-        assertTrue(result.isEmpty());
+        assertThat(result.isEmpty());
     }
 
     @Test
@@ -152,19 +158,18 @@ class CenterJpaPersistenceAdapterTest {
     void update_shouldFindEntityUpdateAndReturnDomain() {
         // Given
         CenterEntityId id = CenterEntityId.from(CENTER_ID, CLIENT_ID);
-        when(repository.findById(id)).thenReturn(Optional.of(centerEntity));
-        when(repository.findById(id)).thenReturn(Optional.of(centerEntity));
-        when(repository.save(centerEntity)).thenReturn(centerEntity);
-        when(mapper.toDomain(centerEntity)).thenReturn(center);
+        given(repository.findById(id)).willReturn(Optional.of(centerEntity));
+        given(repository.save(centerEntity)).willReturn(centerEntity);
+        given(mapper.toDomain(centerEntity)).willReturn(center);
 
         // When
         Center result = adapter.update(center);
 
         // Then
-        then(repository).findById(id);
-        verify(mapper).should().update(centerEntity, center);
-        then(mapper).toDomain(centerEntity);
-        assertThat(result).should().isNotNull();
+        then(repository).should().findById(id);
+        then(mapper).should().update(centerEntity, center);
+        then(mapper).should().toDomain(centerEntity);
+        assertThat(result).isNotNull();
     }
 
     @Test
@@ -173,7 +178,7 @@ class CenterJpaPersistenceAdapterTest {
         // Given
         CenterEntityId id = CenterEntityId.from(CENTER_ID, CLIENT_ID);
 
-        when(repository.findById(id)).thenReturn(Optional.empty());
+        given(repository.findById(id)).willReturn(Optional.empty());
 
         // When & Then
         assertThrows(ResourceNotFoundException.class, () -> adapter.update(center));
@@ -192,27 +197,27 @@ class CenterJpaPersistenceAdapterTest {
         adapter.delete(CENTER_ID, CLIENT_ID);
 
         // Then
-        then(repository).deleteById(id);
+        then(repository).should().deleteById(id);
     }
 
     @Test
     @DisplayName("search should use specification and map results to domain")
     void search_shouldUseSpecificationAndMapResults() {
         // Given
-        CenterSearch criteria = CenterSearch.builder().name("Test").should().build();
+        CenterSearch criteria = CenterSearch.builder().name("Test").build();
         Pageable pageable = PageRequest.of(0, 10);
         Page<CenterEntity> entityPage = new PageImpl<>(List.of(centerEntity), pageable, 1);
 
-        when(repository.findAll(any(Specification.class), eq(pageable))).thenReturn(entityPage);
-        when(mapper.toDomain(centerEntity)).thenReturn(center);
+        given(repository.findAll(any(Specification.class), eq(pageable))).willReturn(entityPage);
+        given(mapper.toDomain(centerEntity)).willReturn(center);
 
         // When
         Page<Center> result = adapter.search(criteria, pageable);
 
         // Then
         then(repository).should().findAll(any(Specification.class), eq(pageable));
-        then(mapper).toDomain(centerEntity);
-        assertThat(result).should().isNotNull();
+        then(mapper).should().toDomain(centerEntity);
+        assertThat(result).isNotNull();
         assertEquals(1, result.getTotalElements());
     }
 
@@ -224,7 +229,7 @@ class CenterJpaPersistenceAdapterTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<CenterEntity> emptyPage = new PageImpl<>(List.of(), pageable, 0);
 
-        when(repository.findAll(any(Specification.class), eq(pageable))).thenReturn(emptyPage);
+        given(repository.findAll(any(Specification.class), eq(pageable))).willReturn(emptyPage);
 
         // When
         Page<Center> result = adapter.search(criteria, pageable);
@@ -233,7 +238,7 @@ class CenterJpaPersistenceAdapterTest {
         then(repository).should().findAll(any(Specification.class), eq(pageable));
         then(mapper).should(never()).toDomain(any(CenterEntity.class));
         assertThat(result).isNotNull();
-        assertEquals(0, result.getTotalElements());
+        assertThat(result.getTotalElements()).isZero();
     }
 
     @Test
@@ -252,36 +257,34 @@ class CenterJpaPersistenceAdapterTest {
 
         Page<CenterEntity> entityPage = new PageImpl<>(List.of(entity1, entity2), pageable, 2);
 
-        Center center1 =
-                Center.builder()
-                        .id(1L)
-                        .clientId(CLIENT_ID)
-                        .name("Center 1")
-                        .address("Address 1")
-                        .postalCode("12345")
-                        .location(Location.from(LOCATION_ID))
-                        .build();
-        Center center2 =
-                Center.builder()
-                        .id(2L)
-                        .clientId(CLIENT_ID)
-                        .name("Center 2")
-                        .address("Address 2")
-                        .postalCode("54321")
-                        .location(Location.from(LOCATION_ID))
-                        .build();
+        Center center1 = Center.builder()
+                .id(1L)
+                .clientId(CLIENT_ID)
+                .name("Center 1")
+                .address("Address 1")
+                .postalCode("12345")
+                .location(Location.from(LOCATION_ID))
+                .build();
+        Center center2 = Center.builder()
+                .id(2L)
+                .clientId(CLIENT_ID)
+                .name("Center 2")
+                .address("Address 2")
+                .postalCode("54321")
+                .location(Location.from(LOCATION_ID))
+                .build();
 
-        when(repository.findAll(any(Specification.class), eq(pageable))).thenReturn(entityPage);
-        when(mapper.toDomain(entity1)).thenReturn(center1);
-        when(mapper.toDomain(entity2)).thenReturn(center2);
+        given(repository.findAll(any(Specification.class), eq(pageable))).willReturn(entityPage);
+        given(mapper.toDomain(entity1)).willReturn(center1);
+        given(mapper.toDomain(entity2)).willReturn(center2);
 
         // When
         Page<Center> result = adapter.search(criteria, pageable);
 
         // Then
         then(repository).should().findAll(any(Specification.class), eq(pageable));
-        then(mapper).toDomain(entity1);
-        verify(mapper).should().toDomain(entity2);
-        assertEquals(2, result.getTotalElements());
+        then(mapper).should().toDomain(entity1);
+        then(mapper).should().toDomain(entity2);
+        assertThat(result.getTotalElements()).isEqualTo(2);
     }
 }

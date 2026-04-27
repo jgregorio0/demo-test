@@ -1,7 +1,16 @@
 package dev.jgregorio.demo.data.domain.center;
 
-import dev.jgregorio.demo.data.application.out.center.CenterPersistencePort;
-import dev.jgregorio.demo.data.domain.exception.ResourceNotFoundException;
+import static dev.jgregorio.demo.data.domain.center.CenterServiceTestDataFactory.CENTER_ID;
+import static dev.jgregorio.demo.data.domain.center.CenterServiceTestDataFactory.CLIENT_ID;
+import static dev.jgregorio.demo.data.domain.center.CenterServiceTestDataFactory.createCenter;
+import static dev.jgregorio.demo.data.domain.center.CenterServiceTestDataFactory.createCenterRead;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,13 +19,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
-import static dev.jgregorio.demo.data.domain.center.CenterServiceTestDataFactory.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import dev.jgregorio.demo.data.application.out.center.CenterPersistencePort;
+import dev.jgregorio.demo.data.domain.exception.ResourceNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class ReadCenterServiceTest {

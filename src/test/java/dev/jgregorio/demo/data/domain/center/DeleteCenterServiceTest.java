@@ -1,6 +1,11 @@
 package dev.jgregorio.demo.data.domain.center;
 
-import dev.jgregorio.demo.data.application.out.center.CenterPersistencePort;
+import static dev.jgregorio.demo.data.domain.center.CenterServiceTestDataFactory.CENTER_ID;
+import static dev.jgregorio.demo.data.domain.center.CenterServiceTestDataFactory.CLIENT_ID;
+import static dev.jgregorio.demo.data.domain.center.CenterServiceTestDataFactory.createCenterDelete;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.doNothing;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,9 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static dev.jgregorio.demo.data.domain.center.CenterServiceTestDataFactory.*;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
+import dev.jgregorio.demo.data.application.out.center.CenterPersistencePort;
 
 @ExtendWith(MockitoExtension.class)
 class DeleteCenterServiceTest {
